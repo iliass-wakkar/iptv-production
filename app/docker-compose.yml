@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  # Next.js Application (UI only)
+  nextjs:
+    build:
+      context: .
+      dockerfile: Dockerfile.nextjs
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./data:/app/data
+    environment:
+      - NODE_ENV=production
+      - ADMIN_PASSWORD=admin2026
+    restart: unless-stopped
+
+  # OpenResty (NGINX + Lua) for stream proxying
+  nginx:
+    image: openresty/openresty:alpine
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./nginx.conf:/usr/local/openresty/nginx/conf/nginx.conf:ro
+      - ./data:/etc/openresty/data:ro
+    depends_on:
+      - nextjs
+    restart: unless-stopped
+
+volumes:
+  data:
