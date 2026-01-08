@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
+import AdBanner from "@/components/AdBanner";
 
 // Types
 interface Channel {
@@ -197,20 +198,7 @@ export default function HomePage() {
         </div>
         <div className="header-right">
           {/* Adsterra Header Banner 728x90 */}
-          <div id="header-ad" dangerouslySetInnerHTML={{
-            __html: `
-              <script>
-                atOptions = {
-                  'key' : 'c8497da66b156445a151c369365cfec8',
-                  'format' : 'iframe',
-                  'height' : 90,
-                  'width' : 728,
-                  'params' : {}
-                };
-              </script>
-              <script src="https://www.highperformanceformat.com/c8497da66b156445a151c369365cfec8/invoke.js"></script>
-            `
-          }} />
+          <AdBanner adKey="c8497da66b156445a151c369365cfec8" width={728} height={90} />
         </div>
       </header>
 
@@ -218,34 +206,8 @@ export default function HomePage() {
       <div className="content-with-ads">
         {/* Left Sidebar Ads */}
         <aside className="ad-sidebar ad-sidebar-left">
-          <div dangerouslySetInnerHTML={{
-            __html: `
-              <script>
-                atOptions = {
-                  'key' : 'f4f75dd9ec066f77eda187fd5d7c9b14',
-                  'format' : 'iframe',
-                  'height' : 600,
-                  'width' : 160,
-                  'params' : {}
-                };
-              </script>
-              <script src="https://www.highperformanceformat.com/f4f75dd9ec066f77eda187fd5d7c9b14/invoke.js"></script>
-            `
-          }} />
-          <div style={{ marginTop: '10px' }} dangerouslySetInnerHTML={{
-            __html: `
-              <script>
-                atOptions = {
-                  'key' : '03c5896734fc5b90882213eba8126ed8',
-                  'format' : 'iframe',
-                  'height' : 300,
-                  'width' : 160,
-                  'params' : {}
-                };
-              </script>
-              <script src="https://www.highperformanceformat.com/03c5896734fc5b90882213eba8126ed8/invoke.js"></script>
-            `
-          }} />
+          <AdBanner adKey="f4f75dd9ec066f77eda187fd5d7c9b14" width={160} height={600} />
+          <AdBanner adKey="03c5896734fc5b90882213eba8126ed8" width={160} height={300} />
         </aside>
 
         <main className="main">
@@ -380,34 +342,8 @@ export default function HomePage() {
 
         {/* Right Sidebar Ads */}
         <aside className="ad-sidebar ad-sidebar-right">
-          <div dangerouslySetInnerHTML={{
-            __html: `
-              <script>
-                atOptions = {
-                  'key' : 'f4f75dd9ec066f77eda187fd5d7c9b14',
-                  'format' : 'iframe',
-                  'height' : 600,
-                  'width' : 160,
-                  'params' : {}
-                };
-              </script>
-              <script src="https://www.highperformanceformat.com/f4f75dd9ec066f77eda187fd5d7c9b14/invoke.js"></script>
-            `
-          }} />
-          <div style={{ marginTop: '10px' }} dangerouslySetInnerHTML={{
-            __html: `
-              <script>
-                atOptions = {
-                  'key' : '03c5896734fc5b90882213eba8126ed8',
-                  'format' : 'iframe',
-                  'height' : 300,
-                  'width' : 160,
-                  'params' : {}
-                };
-              </script>
-              <script src="https://www.highperformanceformat.com/03c5896734fc5b90882213eba8126ed8/invoke.js"></script>
-            `
-          }} />
+          <AdBanner adKey="f4f75dd9ec066f77eda187fd5d7c9b14" width={160} height={600} />
+          <AdBanner adKey="03c5896734fc5b90882213eba8126ed8" width={160} height={300} />
         </aside>
       </div>
 
