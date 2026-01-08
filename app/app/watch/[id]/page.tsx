@@ -3,7 +3,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import Script from "next/script";
 
 interface Channel {
     name: string;
@@ -177,6 +176,40 @@ export default function WatchPage() {
     const playerRef = useRef<any>(null);
     const bytesDownloadedRef = useRef(0);
     const trackingIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
+    // Load external scripts on mount
+    useEffect(() => {
+        // Check if already loaded
+        if (typeof window !== 'undefined' && (window as any).mpegts) {
+            setScriptsLoaded(true);
+            return;
+        }
+
+        const loadScript = (src: string): Promise<void> => {
+            return new Promise((resolve, reject) => {
+                const existing = document.querySelector(`script[src="${src}"]`);
+                if (existing) {
+                    resolve();
+                    return;
+                }
+                const script = document.createElement('script');
+                script.src = src;
+                script.async = true;
+                script.onload = () => resolve();
+                script.onerror = reject;
+                document.head.appendChild(script);
+            });
+        };
+
+        Promise.all([
+            loadScript('https://cdn.jsdelivr.net/npm/hls.js@1.4.12/dist/hls.min.js'),
+            loadScript('https://cdn.jsdelivr.net/npm/mpegts.js@1.7.3/dist/mpegts.min.js')
+        ]).then(() => {
+            setScriptsLoaded(true);
+        }).catch(err => {
+            console.error('Failed to load player scripts:', err);
+        });
+    }, []);
 
     // Fetch channel info
     useEffect(() => {
@@ -431,15 +464,7 @@ export default function WatchPage() {
         <>
             <style>{playerStyles}</style>
 
-            {/* External player scripts */}
-            <Script
-                src="https://cdn.jsdelivr.net/npm/hls.js@1.4.12/dist/hls.min.js"
-                onLoad={() => { }}
-            />
-            <Script
-                src="https://cdn.jsdelivr.net/npm/mpegts.js@1.7.3/dist/mpegts.min.js"
-                onLoad={() => setScriptsLoaded(true)}
-            />
+            {/* Scripts loaded dynamically in useEffect */}
 
             <div className="player-page">
                 <div className="player-container">
