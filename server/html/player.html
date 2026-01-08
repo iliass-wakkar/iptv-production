@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loading... - IPTV Player</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <!-- HLS.js for .m3u8 streams -->
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@1.4.12/dist/hls.min.js"></script>
+    <!-- mpegts.js for MPEG-TS streams -->
+    <script src="https://cdn.jsdelivr.net/npm/mpegts.js@1.7.3/dist/mpegts.min.js"></script>
+    <style>
+        .server-selector {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .server-btn {
+            padding: 10px 20px;
+            background: var(--bg-card);
+            border: 2px solid transparent;
+            border-radius: 8px;
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .server-btn:hover {
+            border-color: var(--accent);
+        }
+
+        .server-btn.active {
+            background: var(--accent);
+            border-color: var(--accent);
+        }
+
+        .server-status {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-top: 10px;
+        }
+
+        .openresty-badge {
+            display: inline-block;
+            background: #2e7d32;
+            color: white;
+            padding: 3px 10px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            margin-left: 10px;
+        }
+
+        .format-badge {
+            display: inline-block;
+            background: #1565c0;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            margin-left: 5px;
+        }
+
+        #limit-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+
+        #limit-overlay #limit-message {
+            font-size: 1.3rem;
+            color: #ff6b6b;
+            margin: 10px 0;
+        }
+
+        #limit-overlay button {
+            margin-top: 20px;
+            padding: 12px 24px;
+            background: var(--accent);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        #limit-overlay button:hover {
+            opacity: 0.9;
+        }
+    </style>
+</head>
+
+<body class="player-page">
+    <div class="player-container">
+        <header class="player-header">
+            <a href="/" class="back-btn">← Back</a>
+            <h1 id="channel-name">Loading... <span class="openresty-badge">⚡ OpenResty</span></h1>
+        </header>
+
+        <div class="video-wrapper">
+            <video id="video-player" controls autoplay></video>
+            <div id="loading-overlay">
+                <div class="spinner"></div>
+                <p>Loading stream...</p>
+            </div>
+            <div id="error-overlay" style="display:none;">
+                <p>⚠️ Stream unavailable</p>
+                <p class="server-status">Try another server below</p>
+                <button onclick="location.reload()">Retry</button>
+            </div>
+            <div id="limit-overlay" style="display:none;">
+                <p style="font-size: 3rem;">🚫</p>
+                <p id="limit-message" style="font-size: 1.5rem; font-weight: bold; color: #ff6b6b;">Too Many Streams
+                    Open!</p>
+                <p class="server-status" id="limit-hint" style="font-size: 1.1rem; max-width: 400px; line-height: 1.6;">
+                    You have too many streams open at the same time.<br><br>
+                    <strong>To watch this channel:</strong><br>
+                    1. Close one of your other streams<br>
+                    2. Wait 60 seconds<br>
+                    3. Try again
+                </p>
+                <button onclick="window.location.href='/'">← Back to Channels</button>
+            </div>
+        </div>
+
+        <div class="player-info">
+            <p>Channel: <strong id="channel-name-info">Loading...</strong> <span id="format-badge"
+                    class="format-badge"></span></p>
+            <p class="secure-note">🔒 Powered by OpenResty - Ultra Fast Streaming</p>
+
+            <div class="server-selector" id="server-selector" style="display:none;">
+                <span style="color: var(--text-secondary);">Servers:</span>
+            </div>
+            <p class="server-status" id="server-status"></p>
+        </div>
+    </div>
+
+    <script>
+        let currentPlayer = null;
+        let currentServer = 0;
+        let channelId = null;
+        let channelData = null;
+        let streamFormat = 'unknown';
+
+        // NOTE: Stream tracking is now handled by NGINX backend
+        // No frontend registration/heartbeat needed
+
+        // Get channel ID from URL
+        const pathParts = window.location.pathname.split('/');
+        channelId = pathParts[pathParts.length - 1];
+
+        // Detect stream format from URL
+        function detectFormat(url) {
+            if (url.includes('.m3u8') || url.includes('m3u8')) {
+                return 'hls';
+            } else if (url.includes('.flv')) {
+                return 'flv';
+            } else {
+                // Default to MPEG-TS for streams without extension
+                return 'mpegts';
+            }
+        }
+
+        // Fetch channel info
+        async function loadChannelInfo() {
+            try {
+                const response = await fetch('/api/channels');
+                const channels = await response.json();
+                channelData = channels[channelId];
+
+                if (!channelData) {
+                    document.getElementById('channel-name').textContent = 'Channel not found';
+                    document.getElementById('error-overlay').style.display = 'flex';
+                    document.getElementById('loading-overlay').style.display = 'none';
+                    return;
+                }
+
+                // Update UI
+                document.title = `${channelData.name} - IPTV Player`;
+                document.getElementById('channel-name').innerHTML =
+                    `${channelData.name} <span class="openresty-badge">⚡ OpenResty</span>`;
+                document.getElementById('channel-name-info').textContent = channelData.name;
+
+                // Show server selector if multiple servers
+                if (channelData.server_count > 1) {
+                    const selector = document.getElementById('server-selector');
+                    selector.style.display = 'flex';
+
+                    for (let i = 0; i < channelData.server_count; i++) {
+                        const btn = document.createElement('button');
+                        btn.className = 'server-btn' + (i === 0 ? ' active' : '');
+                        btn.textContent = `Server ${i + 1}`;
+                        btn.onclick = () => switchServer(i);
+                        btn.id = `server-btn-${i}`;
+                        selector.appendChild(btn);
+                    }
+
+                    document.getElementById('server-status').textContent =
+                        `Using Server 1 of ${channelData.server_count}`;
+                }
+
+                // Start playing (stream limits checked by NGINX)
+                startPlayer(0);
+
+            } catch (error) {
+                console.error('Failed to load channel:', error);
+                document.getElementById('error-overlay').style.display = 'flex';
+                document.getElementById('loading-overlay').style.display = 'none';
+            }
+        }
+
+        async function startPlayer(serverIdx) {
+            const video = document.getElementById('video-player');
+            const loadingOverlay = document.getElementById('loading-overlay');
+            const errorOverlay = document.getElementById('error-overlay');
+            const limitOverlay = document.getElementById('limit-overlay');
+
+            loadingOverlay.style.display = 'flex';
+            errorOverlay.style.display = 'none';
+            limitOverlay.style.display = 'none';
+
+            // Destroy existing player
+            if (currentPlayer) {
+                if (currentPlayer.destroy) {
+                    currentPlayer.destroy();
+                } else if (currentPlayer.stopLoad) {
+                    currentPlayer.stopLoad();
+                    currentPlayer.detachMedia();
+                }
+                currentPlayer = null;
+            }
+            video.src = '';
+
+            const streamUrl = window.location.origin + `/stream/${channelId}/${serverIdx}`;
+            console.log('Playing:', streamUrl);
+
+            // First, probe the stream to detect format
+            try {
+                const probeResponse = await fetch(streamUrl, { method: 'HEAD' });
+
+                // Check for stream limit error
+                if (probeResponse.status === 429) {
+                    loadingOverlay.style.display = 'none';
+                    limitOverlay.style.display = 'flex';
+
+                    // Try to get error details
+                    try {
+                        const errorData = await probeResponse.json();
+                        document.getElementById('limit-message').textContent =
+                            '🚫 ' + (errorData.error || 'Stream limit reached');
+                    } catch (e) {
+                        document.getElementById('limit-message').textContent =
+                            '🚫 Stream limit reached';
+                    }
+                    return;
+                }
+
+                // Check for auth error
+                if (probeResponse.status === 401) {
+                    alert('Please login to watch streams');
+                    window.location.href = '/login.html';
+                    return;
+                }
+
+                const contentType = probeResponse.headers.get('content-type') || '';
+                const finalUrl = probeResponse.url; // After redirects
+
+                // Detect format from content-type or URL
+                if (contentType.includes('mpegurl') || contentType.includes('m3u8') || finalUrl.includes('.m3u8')) {
+                    streamFormat = 'hls';
+                } else if (contentType.includes('mp2t') || contentType.includes('mpeg')) {
+                    streamFormat = 'mpegts';
+                } else {
+                    // Fallback: check URL pattern
+                    streamFormat = detectFormat(finalUrl);
+                }
+
+                console.log('Detected format:', streamFormat, 'Content-Type:', contentType);
+            } catch (e) {
+                console.log('Probe failed, defaulting to mpegts');
+                streamFormat = 'mpegts';
+            }
+
+            // Update format badge
+            const formatBadge = document.getElementById('format-badge');
+            formatBadge.textContent = streamFormat.toUpperCase();
+
+            video.addEventListener('playing', () => {
+                loadingOverlay.style.display = 'none';
+            });
+
+            video.addEventListener('canplay', () => {
+                loadingOverlay.style.display = 'none';
+            });
+
+            video.addEventListener('error', () => {
+                loadingOverlay.style.display = 'none';
+                errorOverlay.style.display = 'flex';
+            });
+
+            // Use appropriate player based on format
+            if (streamFormat === 'hls') {
+                // Use HLS.js for .m3u8 streams
+                if (typeof Hls !== 'undefined' && Hls.isSupported()) {
+                    console.log('Using HLS.js for m3u8 stream');
+
+                    const hls = new Hls({
+                        debug: false,
+                        enableWorker: true,
+                        lowLatencyMode: true,
+                    });
+
+                    hls.loadSource(streamUrl);
+                    hls.attachMedia(video);
+
+                    hls.on(Hls.Events.MANIFEST_PARSED, () => {
+                        console.log('HLS manifest parsed, playing...');
+                        video.play().catch(e => console.log('Click to play'));
+                    });
+
+                    hls.on(Hls.Events.ERROR, (event, data) => {
+                        console.error('HLS error:', data);
+                        if (data.fatal) {
+                            loadingOverlay.style.display = 'none';
+                            errorOverlay.style.display = 'flex';
+                        }
+                    });
+
+                    currentPlayer = hls;
+
+                } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                    // Native HLS support (Safari)
+                    console.log('Using native HLS');
+                    video.src = streamUrl;
+                    video.play().catch(e => console.log('Click to play'));
+                } else {
+                    console.error('HLS not supported');
+                    errorOverlay.style.display = 'flex';
+                    loadingOverlay.style.display = 'none';
+                }
+
+            } else {
+                // Use mpegts.js for MPEG-TS streams
+                if (typeof mpegts !== 'undefined' && mpegts.isSupported()) {
+                    console.log('Using mpegts.js for TS stream');
+
+                    const player = mpegts.createPlayer({
+                        type: 'mpegts',
+                        isLive: true,
+                        url: streamUrl
+                    }, {
+                        enableWorker: false,
+                        enableStashBuffer: true,
+                        stashInitialSize: 1024 * 1024,
+                        autoCleanupSourceBuffer: true,
+                        liveBufferLatencyChasing: false,
+                        fixAudioTimestampGap: true,
+                    });
+
+                    player.attachMediaElement(video);
+                    player.load();
+
+                    player.on(mpegts.Events.ERROR, (errorType, detail) => {
+                        console.error('mpegts error:', errorType, detail);
+                        loadingOverlay.style.display = 'none';
+                        errorOverlay.style.display = 'flex';
+                    });
+
+                    video.play().catch(e => console.log('Click to play'));
+                    currentPlayer = player;
+
+                } else {
+                    // Fallback to native video
+                    video.src = streamUrl;
+                    video.play().catch(() => {
+                        errorOverlay.style.display = 'flex';
+                    });
+                }
+            }
+        }
+
+        function switchServer(serverIdx) {
+            if (serverIdx === currentServer) return;
+
+            console.log('Switching to server', serverIdx + 1);
+
+            // Update UI
+            document.querySelectorAll('.server-btn').forEach((btn, i) => {
+                btn.classList.toggle('active', i === serverIdx);
+            });
+            document.getElementById('server-status').textContent =
+                `Using Server ${serverIdx + 1} of ${channelData.server_count}`;
+
+            currentServer = serverIdx;
+            startPlayer(serverIdx);
+        }
+
+        // Fullscreen on double-click
+        document.getElementById('video-player').addEventListener('dblclick', () => {
+            const video = document.getElementById('video-player');
+            if (document.fullscreenElement) {
+                document.exitFullscreen();
+            } else {
+                video.requestFullscreen();
+            }
+        });
+
+        // Load channel info on page load
+        loadChannelInfo();
+    </script>
+</body>
+
+</html>

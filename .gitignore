@@ -1,0 +1,38 @@
+# Dependencies
+node_modules/
+.next/
+
+# Environment files (contain secrets)
+.env
+.env.local
+.env.production
+
+# Keys
+keys/
+*.key
+*.pem
+
+# Local data
+data/stats.json
+data/*.db
+
+# Sources (large files)
+sources/
+m3u-sources/
+
+# Build artifacts
+*.zip
+*.tar.gz
+deploy.tar.gz
+
+# Backups
+*.backup.*
+backups/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/

@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IPTV Player</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #050505;
+            --bg-card: rgba(255, 255, 255, 0.05);
+            --bg-card-hover: rgba(255, 255, 255, 0.08);
+            --bg-elevated: rgba(255, 255, 255, 0.03);
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0a0;
+            --text-muted: #666666;
+            --border: rgba(255, 255, 255, 0.1);
+            --border-hover: rgba(255, 255, 255, 0.2);
+            --glass: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --gradient-start: #6366f1;
+            --gradient-end: #a855f7;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.5;
+        }
+
+        /* Glassmorphism Header */
+        .header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(15, 15, 15, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 16px 48px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .logo {
+            font-size: 22px;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.5px;
+        }
+
+        .header-center {
+            flex: 1;
+            max-width: 400px;
+            margin: 0 40px;
+        }
+
+        .search-wrapper {
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px 16px 12px 44px;
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-size: 14px;
+            font-family: inherit;
+            transition: all 0.3s;
+            backdrop-filter: blur(10px);
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--gradient-start);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .search-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-size: 16px;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .slots-info {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .slots-count {
+            color: #22c55e;
+            font-weight: 600;
+        }
+
+        /* Gradient CTA Button with Glow */
+        .btn-cta {
+            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+            color: white;
+            border: none;
+            padding: 12px 28px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+            box-shadow: 0 4px 24px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn-cta:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 32px rgba(99, 102, 241, 0.5);
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+
+        .user-name {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .btn-ghost {
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            color: var(--text-secondary);
+            padding: 10px 18px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+
+        .btn-ghost:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-primary);
+        }
+
+        /* Main Content */
+        .main {
+            padding: 40px 48px;
+        }
+
+        /* Section */
+        .section {
+            margin-bottom: 56px;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+        }
+
+        .section-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .slider-controls {
+            display: flex;
+            gap: 8px;
+        }
+
+        .slider-btn {
+            width: 40px;
+            height: 40px;
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            border-radius: 50%;
+            color: var(--text-secondary);
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .slider-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-primary);
+        }
+
+        /* Netflix-Style Trending Slider */
+        .trending-slider {
+            display: flex;
+            gap: 24px;
+            overflow-x: auto;
+            scroll-behavior: smooth;
+            padding: 20px 0;
+            scrollbar-width: none;
+        }
+
+        .trending-slider::-webkit-scrollbar {
+            display: none;
+        }
+
+        .trending-card {
+            flex: 0 0 280px;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            text-decoration: none;
+        }
+
+        .trending-card:hover {
+            transform: scale(1.08);
+            z-index: 10;
+        }
+
+        /* Large Netflix-style rank number */
+        .trending-rank-bg {
+            position: absolute;
+            left: -20px;
+            bottom: 0;
+            font-size: 140px;
+            font-weight: 800;
+            line-height: 1;
+            color: var(--bg-primary);
+            -webkit-text-stroke: 2px var(--text-muted);
+            z-index: 1;
+            user-select: none;
+        }
+
+        .trending-content {
+            position: relative;
+            z-index: 2;
+            background: var(--bg-card);
+            border-radius: 12px;
+            overflow: hidden;
+            margin-left: 50px;
+            border: 1px solid var(--border);
+            transition: border-color 0.3s;
+        }
+
+        .trending-card:hover .trending-content {
+            border-color: var(--border-hover);
+            box-shadow: 0 8px 32px rgba(99, 102, 241, 0.2);
+        }
+
+        .trending-thumb {
+            height: 160px;
+            background: var(--bg-elevated);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .trending-thumb-bg {
+            position: absolute;
+            inset: 0;
+            background-size: cover;
+            background-position: center;
+            filter: blur(30px) brightness(0.4);
+            transform: scale(1.2);
+        }
+
+        .trending-thumb img {
+            position: relative;
+            z-index: 1;
+            max-height: 80px;
+            max-width: 70%;
+            object-fit: contain;
+        }
+
+        .trending-live {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: #ef4444;
+            color: white;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 4px 8px;
+            border-radius: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            animation: pulse 2s infinite;
+            z-index: 2;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.7;
+            }
+        }
+
+        .trending-info {
+            padding: 16px;
+        }
+
+        .trending-name {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text-primary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-bottom: 4px;
+        }
+
+        .trending-category {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        /* Top 3 special colors */
+        .trending-card:nth-child(1) .trending-rank-bg {
+            -webkit-text-stroke-color: #fbbf24;
+        }
+
+        .trending-card:nth-child(2) .trending-rank-bg {
+            -webkit-text-stroke-color: #9ca3af;
+        }
+
+        .trending-card:nth-child(3) .trending-rank-bg {
+            -webkit-text-stroke-color: #cd7c32;
+        }
+
+        /* Category Tabs - Glassmorphism style */
+        .category-bar {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 32px;
+            overflow-x: auto;
+            padding: 8px 0;
+            scrollbar-width: none;
+        }
+
+        .category-bar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .category-tab {
+            padding: 10px 20px;
+            background: transparent;
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            color: var(--text-secondary);
+            font-size: 13px;
+            font-weight: 500;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .category-tab:hover {
+            background: var(--glass);
+            color: var(--text-primary);
+        }
+
+        .category-tab.active {
+            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+            color: white;
+            border-color: transparent;
+            font-weight: 700;
+        }
+
+        .category-count {
+            font-size: 11px;
+            opacity: 0.7;
+        }
+
+        /* Channel Grid - 16:9 with blurred backgrounds */
+        .channel-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 20px;
+        }
+
+        .channel-card {
+            aspect-ratio: 16/9;
+            background: var(--bg-card);
+            border-radius: 12px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-decoration: none;
+            position: relative;
+            border: 1px solid var(--border);
+        }
+
+        .channel-card:hover {
+            transform: scale(1.03);
+            background: var(--bg-card-hover);
+            border-color: var(--border-hover);
+            box-shadow: 0 8px 32px rgba(99, 102, 241, 0.15);
+        }
+
+        .channel-bg {
+            position: absolute;
+            inset: 0;
+            background-size: cover;
+            background-position: center;
+            filter: blur(40px) brightness(0.3) saturate(1.2);
+            transform: scale(1.3);
+        }
+
+        .channel-content {
+            position: relative;
+            z-index: 1;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background: linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.6) 100%);
+        }
+
+        .channel-logo {
+            max-height: 56px;
+            max-width: 70%;
+            object-fit: contain;
+            margin-bottom: 12px;
+        }
+
+        .channel-placeholder {
+            font-size: 48px;
+            opacity: 0.4;
+            margin-bottom: 12px;
+        }
+
+        .channel-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+            text-align: center;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 100%;
+        }
+
+        .channel-group {
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+
+        .channel-live {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            background: #ef4444;
+            color: white;
+            font-size: 9px;
+            font-weight: 700;
+            padding: 3px 6px;
+            border-radius: 3px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            animation: pulse 2s infinite;
+        }
+
+        /* States */
+        .loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 100px;
+            color: var(--text-muted);
+        }
+
+        .spinner {
+            width: 36px;
+            height: 36px;
+            border: 2px solid var(--border);
+            border-top-color: var(--gradient-start);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-bottom: 16px;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 100px;
+            color: var(--text-muted);
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 48px;
+            color: var(--text-muted);
+            font-size: 12px;
+            border-top: 1px solid var(--border);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header {
+                padding: 12px 20px;
+            }
+
+            .header-center {
+                display: none;
+            }
+
+            .main {
+                padding: 24px 20px;
+            }
+
+            .trending-card {
+                flex: 0 0 220px;
+            }
+
+            .trending-rank-bg {
+                font-size: 100px;
+            }
+
+            .channel-grid {
+                grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+                gap: 12px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header class="header">
+        <div class="logo">IPTV</div>
+
+        <div class="header-center">
+            <div class="search-wrapper">
+                <span class="search-icon">🔍</span>
+                <input type="text" class="search-input" id="search-input" placeholder="Search channels...">
+            </div>
+        </div>
+
+        <div class="header-right" id="auth-area"></div>
+    </header>
+
+    <main class="main">
+        <!-- Trending -->
+        <section class="section">
+            <div class="section-header">
+                <h2 class="section-title">Trending Now</h2>
+                <div class="slider-controls">
+                    <button class="slider-btn" onclick="slideLeft()">◀</button>
+                    <button class="slider-btn" onclick="slideRight()">▶</button>
+                </div>
+            </div>
+            <div class="trending-slider" id="trending-slider"></div>
+        </section>
+
+        <!-- Categories -->
+        <div class="category-bar" id="category-bar"></div>
+
+        <!-- Channels -->
+        <div id="loading" class="loading">
+            <div class="spinner"></div>
+            <span>Loading channels...</span>
+        </div>
+
+        <div class="channel-grid" id="channel-grid"></div>
+        <div id="empty-state" class="empty-state" style="display:none;">No channels found</div>
+    </main>
+
+    <footer class="footer">Secure streaming powered by OpenResty</footer>
+
+    <script>
+        let allChannels = {};
+        let isLoggedIn = false;
+        let currentUser = null;
+        let currentCategory = 'all';
+        let availableSlots = 150;
+
+        const CATEGORIES = [
+            { id: 'all', name: 'All' },
+            { id: 'sports', name: 'Sports', match: ['SPORTS', 'BEIN', 'RMC', 'DAZN', 'EUROSPORT', 'ESPN'] },
+            { id: 'cinema', name: 'Movies', match: ['CINEMA', 'MOVIE', 'FILM'] },
+            { id: 'france', name: 'France', match: ['FR|FRANCE', 'FRANCE ', 'TF1', 'M6', 'ARTE'] },
+            { id: 'africa', name: 'Africa', match: ['AF|', 'AFRIQUE', 'AFRICA'] },
+            { id: 'music', name: 'Music', match: ['MUSIQUE', 'MUSIC', 'MTV'] },
+            { id: 'kids', name: 'Kids', match: ['JEUNESSE', 'KIDS', 'CARTOON', 'DISNEY', 'NICK'] },
+            { id: 'docs', name: 'Documentary', match: ['DOCUMENTAIRE', 'DISCOVERY', 'NAT GEO', 'HISTORY'] },
+            { id: 'usa', name: 'USA', match: ['US|', 'USA|', 'NBA', 'NFL', 'NHL', 'ABC', 'CBS', 'NBC', 'FOX'] },
+            { id: 'arab', name: 'Arabic', match: ['AR|', 'ALGERIE', 'MAROC', 'TUNISIE', 'ARAB'] }
+        ];
+
+        async function checkAuth() {
+            try {
+                const res = await fetch('/auth/session');
+                const data = await res.json();
+                isLoggedIn = data.valid;
+                currentUser = data;
+            } catch (e) { isLoggedIn = false; }
+            try {
+                const res = await fetch('/auth/status');
+                const data = await res.json();
+                availableSlots = data.available_slots;
+            } catch (e) { }
+            updateAuthUI();
+        }
+
+        function updateAuthUI() {
+            const authArea = document.getElementById('auth-area');
+            if (isLoggedIn) {
+                let adminBtn = '';
+                if (currentUser.user_type === 'admin') {
+                    adminBtn = `<a href="/admin.html" class="btn-ghost" style="color:#a78bfa;border-color:#a78bfa;">🚀 Admin</a>`;
+                }
+
+                authArea.innerHTML = `
+                    <div class="user-menu">
+                        ${adminBtn}
+                        <div class="user-avatar">👤</div>
+                        <span class="user-name">${currentUser.username}</span>
+                        <a href="/auth/logout" class="btn-ghost">Sign Out</a>
+                    </div>
+                `;
+            } else {
+                authArea.innerHTML = `
+                    <span class="slots-info"><span class="slots-count">${availableSlots}</span> spots left</span>
+                    <a href="/login.html" class="btn-cta">Get Access</a>
+                `;
+            }
+        }
+
+        async function loadChannels() {
+            try {
+                const res = await fetch('/api/channels');
+                allChannels = await res.json();
+                document.getElementById('loading').style.display = 'none';
+                renderCategories();
+                renderTrending();
+                renderChannels();
+            } catch (e) {
+                document.getElementById('loading').innerHTML = '<span>Failed to load</span>';
+            }
+        }
+
+        function getChannelCategory(channel) {
+            const combined = (channel.name + ' ' + (channel.group || '')).toUpperCase();
+            for (const cat of CATEGORIES) {
+                if (cat.id === 'all') continue;
+                if (cat.match && cat.match.some(m => combined.includes(m))) return cat.id;
+            }
+            return 'other';
+        }
+
+        function getCategoryCounts() {
+            const counts = { all: 0 };
+            CATEGORIES.forEach(cat => counts[cat.id] = 0);
+            Object.values(allChannels).forEach(ch => {
+                counts.all++;
+                counts[getChannelCategory(ch)]++;
+            });
+            return counts;
+        }
+
+        function renderCategories() {
+            const bar = document.getElementById('category-bar');
+            const counts = getCategoryCounts();
+            bar.innerHTML = CATEGORIES.map(cat => `
+                <button class="category-tab ${cat.id === currentCategory ? 'active' : ''}" onclick="selectCategory('${cat.id}')">
+                    ${cat.name} <span class="category-count">${counts[cat.id] || 0}</span>
+                </button>
+            `).join('');
+        }
+
+        function renderTrending() {
+            const slider = document.getElementById('trending-slider');
+            const entries = Object.entries(allChannels);
+            const trending = entries.filter(([id, ch]) => getChannelCategory(ch) === 'sports').slice(0, 10);
+
+            slider.innerHTML = trending.map(([channelId, channel], idx) => `
+                <a class="trending-card" href="#" onclick="watchChannel('${channelId}'); return false;">
+                    <span class="trending-rank-bg">${idx + 1}</span>
+                    <div class="trending-content">
+                        <div class="trending-thumb">
+                            ${channel.logo && channel.logo !== 'Logo N/A' ? `<div class="trending-thumb-bg" style="background-image:url('${channel.logo}')"></div>` : ''}
+                            ${channel.logo && channel.logo !== 'Logo N/A' ? `<img src="${channel.logo}" onerror="this.style.display='none'">` : '<span style="font-size:48px;opacity:0.3">📺</span>'}
+                            <span class="trending-live">LIVE</span>
+                        </div>
+                        <div class="trending-info">
+                            <div class="trending-name">${channel.name}</div>
+                            <div class="trending-category">${channel.group || 'Live TV'}</div>
+                        </div>
+                    </div>
+                </a>
+            `).join('');
+        }
+
+        function renderChannels() {
+            const grid = document.getElementById('channel-grid');
+            const empty = document.getElementById('empty-state');
+            const search = document.getElementById('search-input').value.toLowerCase();
+
+            let entries = Object.entries(allChannels);
+            if (currentCategory !== 'all') entries = entries.filter(([id, ch]) => getChannelCategory(ch) === currentCategory);
+            if (search) entries = entries.filter(([id, ch]) => ch.name.toLowerCase().includes(search) || (ch.group || '').toLowerCase().includes(search));
+            entries.sort((a, b) => a[1].name.localeCompare(b[1].name));
+
+            if (entries.length === 0) {
+                grid.innerHTML = '';
+                empty.style.display = 'block';
+                return;
+            }
+            empty.style.display = 'none';
+
+            grid.innerHTML = entries.map(([channelId, channel]) => `
+                <a class="channel-card" href="#" onclick="watchChannel('${channelId}'); return false;">
+                    ${channel.logo && channel.logo !== 'Logo N/A' ? `<div class="channel-bg" style="background-image:url('${channel.logo}')"></div>` : ''}
+                    <div class="channel-content">
+                        <span class="channel-live">LIVE</span>
+                        ${channel.logo && channel.logo !== 'Logo N/A'
+                    ? `<img class="channel-logo" src="${channel.logo}" onerror="this.outerHTML='<span class=\\'channel-placeholder\\'>📺</span>'">`
+                    : '<span class="channel-placeholder">📺</span>'}
+                        <div class="channel-name">${channel.name}</div>
+                        <div class="channel-group">${channel.group || ''}</div>
+                    </div>
+                </a>
+            `).join('');
+        }
+
+        function selectCategory(catId) { currentCategory = catId; renderCategories(); renderChannels(); }
+        function watchChannel(channelId) { window.location.href = isLoggedIn ? `/watch/${channelId}` : '/login.html'; }
+        function slideLeft() { document.getElementById('trending-slider').scrollBy({ left: -400, behavior: 'smooth' }); }
+        function slideRight() { document.getElementById('trending-slider').scrollBy({ left: 400, behavior: 'smooth' }); }
+
+        document.getElementById('search-input').addEventListener('input', renderChannels);
+        checkAuth();
+        loadChannels();
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,49 @@
+{
+  "totalBytes": 0,
+  "totalViews": 11,
+  "hourlyStats": {
+    "2026-01-07T23": {
+      "bytes": 0,
+      "views": 3
+    },
+    "2026-01-08T00": {
+      "bytes": 0,
+      "views": 4
+    },
+    "2026-01-08T01": {
+      "bytes": 0,
+      "views": 4
+    }
+  },
+  "channelStats": {
+    "ch_436": {
+      "bytes": 0,
+      "views": 1
+    },
+    "ch_1267": {
+      "bytes": 0,
+      "views": 1
+    },
+    "ch_4": {
+      "bytes": 0,
+      "views": 1
+    },
+    "ch_534": {
+      "bytes": 0,
+      "views": 1
+    },
+    "ch_536": {
+      "bytes": 0,
+      "views": 3
+    },
+    "ch_105": {
+      "bytes": 0,
+      "views": 3
+    },
+    "ch_1266": {
+      "bytes": 0,
+      "views": 1
+    }
+  },
+  "activeSessions": {}
+}

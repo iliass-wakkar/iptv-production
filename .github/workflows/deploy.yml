@@ -1,0 +1,67 @@
+name: Deploy IPTV
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:  # Allow manual trigger
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup SSH Key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.SERVER_IP }} >> ~/.ssh/known_hosts
+
+      - name: Deploy to Server
+        run: |
+          # Create deployment package (excluding unnecessary files)
+          tar -czf deploy.tar.gz \
+            --exclude='node_modules' \
+            --exclude='.next' \
+            --exclude='.git' \
+            --exclude='*.zip' \
+            app server
+
+          # Upload to server
+          scp -o StrictHostKeyChecking=no deploy.tar.gz ubuntu@${{ secrets.SERVER_IP }}:~/iptv-app/
+
+          # Extract and rebuild on server
+          ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.SERVER_IP }} << 'EOF'
+            cd ~/iptv-app
+            
+            # Backup current version
+            [ -d app ] && mv app app.backup.$(date +%Y%m%d_%H%M%S) || true
+            [ -d server ] && mv server server.backup.$(date +%Y%m%d_%H%M%S) || true
+            
+            # Extract new version
+            tar -xzf deploy.tar.gz
+            rm deploy.tar.gz
+            
+            # Set permissions
+            chmod -R 755 app server
+            
+            # Rebuild and restart containers
+            cd server
+            docker compose down
+            docker compose up --build -d
+            
+            # Cleanup old backups (keep last 3)
+            cd ~/iptv-app
+            ls -dt app.backup.* 2>/dev/null | tail -n +4 | xargs rm -rf 2>/dev/null || true
+            ls -dt server.backup.* 2>/dev/null | tail -n +4 | xargs rm -rf 2>/dev/null || true
+            
+            echo "✅ Deployment complete!"
+          EOF
+
+      - name: Verify Deployment
+        run: |
+          sleep 10
+          curl -f http://${{ secrets.SERVER_IP }}:80 || echo "Warning: Health check failed"
