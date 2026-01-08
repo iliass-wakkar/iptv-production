@@ -3,7 +3,7 @@ name: Deploy IPTV
 on:
   push:
     branches: [main]
-  workflow_dispatch:  # Allow manual trigger
+  workflow_dispatch:
 
 jobs:
   deploy:
@@ -22,46 +22,30 @@ jobs:
 
       - name: Deploy to Server
         run: |
-          # Create deployment package (excluding unnecessary files)
-          tar -czf deploy.tar.gz \
-            --exclude='node_modules' \
-            --exclude='.next' \
-            --exclude='.git' \
-            --exclude='*.zip' \
-            app server
+          # Use rsync for reliable sync (excludes are handled by .gitignore)
+          rsync -avz --delete \
+            --exclude 'node_modules' \
+            --exclude '.next' \
+            --exclude '.git' \
+            --exclude '*.zip' \
+            --exclude '.env' \
+            --exclude '.env.local' \
+            ./app/ ubuntu@${{ secrets.SERVER_IP }}:~/iptv-app/app/
+          
+          rsync -avz --delete \
+            --exclude '.env' \
+            ./server/ ubuntu@${{ secrets.SERVER_IP }}:~/iptv-app/server/
 
-          # Upload to server
-          scp -o StrictHostKeyChecking=no deploy.tar.gz ubuntu@${{ secrets.SERVER_IP }}:~/iptv-app/
-
-          # Extract and rebuild on server
-          ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.SERVER_IP }} << 'EOF'
-            cd ~/iptv-app
-            
-            # Backup current version
-            [ -d app ] && mv app app.backup.$(date +%Y%m%d_%H%M%S) || true
-            [ -d server ] && mv server server.backup.$(date +%Y%m%d_%H%M%S) || true
-            
-            # Extract new version
-            tar -xzf deploy.tar.gz
-            rm deploy.tar.gz
-            
-            # Set permissions
-            chmod -R 755 app server
-            
-            # Rebuild and restart containers
-            cd server
+          # Rebuild on server
+          ssh ubuntu@${{ secrets.SERVER_IP }} << 'EOF'
+            cd ~/iptv-app/server
+            chmod -R 755 ~/iptv-app/app ~/iptv-app/server
             docker compose down
             docker compose up --build -d
-            
-            # Cleanup old backups (keep last 3)
-            cd ~/iptv-app
-            ls -dt app.backup.* 2>/dev/null | tail -n +4 | xargs rm -rf 2>/dev/null || true
-            ls -dt server.backup.* 2>/dev/null | tail -n +4 | xargs rm -rf 2>/dev/null || true
-            
             echo "✅ Deployment complete!"
           EOF
 
       - name: Verify Deployment
         run: |
-          sleep 10
-          curl -f http://${{ secrets.SERVER_IP }}:80 || echo "Warning: Health check failed"
+          sleep 15
+          curl -sf http://${{ secrets.SERVER_IP }}:80 > /dev/null && echo "✅ Site is up!" || echo "⚠️ Health check failed"
