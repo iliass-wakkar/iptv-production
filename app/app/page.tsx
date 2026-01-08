@@ -202,66 +202,67 @@ export default function HomePage() {
         </div>
       </header>
 
-      {/* Main content with ad sidebars */}
+      {/* Trending Section - Full Width */}
+      <section className="trending-section">
+        <div className="section-header" style={{ padding: '40px 48px 0' }}>
+          <h2 className="section-title">Trending Now</h2>
+        </div>
+        <div className="slider-container" style={{ padding: '0 48px' }}>
+          <button className="slider-arrow left" onClick={slideLeft} aria-label="Scroll left">
+            ‹
+          </button>
+          <div className="trending-slider" ref={sliderRef}>
+            {trendingChannels.map(([channelId, channel], idx) => (
+              <Link
+                key={channelId}
+                href={`/watch/${channelId}`}
+                className="trending-card"
+              >
+                <span className="trending-rank-bg">{idx + 1}</span>
+                <div className="trending-content">
+                  <div className="trending-thumb">
+                    {isValidLogo(channel.logo) && (
+                      <div
+                        className="trending-thumb-bg"
+                        style={{ backgroundImage: `url('${channel.logo}')` }}
+                      />
+                    )}
+                    {isValidLogo(channel.logo) ? (
+                      <img src={channel.logo} alt={channel.name} />
+                    ) : (
+                      <div className={`channel-placeholder ${getGradientClass(channel.name)}`}>
+                        {getInitials(channel.name)}
+                      </div>
+                    )}
+                    <span className="trending-live">LIVE</span>
+                  </div>
+                  <div className="trending-info">
+                    <div className="trending-name">{channel.name}</div>
+                    <div className="trending-category">
+                      {channel.group || "Live TV"}
+                    </div>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+          <button className="slider-arrow right" onClick={slideRight} aria-label="Scroll right">
+            ›
+          </button>
+          <div className="slider-fade" />
+        </div>
+      </section>
+
+      {/* Channel Grid with Ad Sidebars */}
       <div className="content-with-ads">
         {/* Left Sidebar Ads */}
         <aside className="ad-sidebar ad-sidebar-left">
           <AdBanner adKey="f4f75dd9ec066f77eda187fd5d7c9b14" width={160} height={600} />
-          <AdBanner adKey="03c5896734fc5b90882213eba8126ed8" width={160} height={300} />
+          {/* TODO: Add more ad keys here when available */}
+          <div className="ad-placeholder" style={{ width: 160, height: 300, background: 'rgba(255,255,255,0.03)', borderRadius: 8 }} />
         </aside>
 
         <main className="main">
-          {/* Trending Section */}
-          <section className="section">
-            <div className="section-header">
-              <h2 className="section-title">Trending Now</h2>
-            </div>
-            <div className="slider-container">
-              <button className="slider-arrow left" onClick={slideLeft} aria-label="Scroll left">
-                ‹
-              </button>
-              <div className="trending-slider" ref={sliderRef}>
-                {trendingChannels.map(([channelId, channel], idx) => (
-                  <Link
-                    key={channelId}
-                    href={`/watch/${channelId}`}
-                    className="trending-card"
-                  >
-                    <span className="trending-rank-bg">{idx + 1}</span>
-                    <div className="trending-content">
-                      <div className="trending-thumb">
-                        {isValidLogo(channel.logo) && (
-                          <div
-                            className="trending-thumb-bg"
-                            style={{ backgroundImage: `url('${channel.logo}')` }}
-                          />
-                        )}
-                        {isValidLogo(channel.logo) ? (
-                          <img src={channel.logo} alt={channel.name} />
-                        ) : (
-                          <div className={`channel-placeholder ${getGradientClass(channel.name)}`}>
-                            {getInitials(channel.name)}
-                          </div>
-                        )}
-                        <span className="trending-live">LIVE</span>
-                      </div>
-                      <div className="trending-info">
-                        <div className="trending-name">{channel.name}</div>
-                        <div className="trending-category">
-                          {channel.group || "Live TV"}
-                        </div>
-                      </div>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-              <button className="slider-arrow right" onClick={slideRight} aria-label="Scroll right">
-                ›
-              </button>
-              <div className="slider-fade" />
-            </div>
-          </section>
-
           {/* Category Bar */}
           <div className="category-bar">
             {CATEGORIES.map((cat) => (
@@ -342,8 +343,9 @@ export default function HomePage() {
 
         {/* Right Sidebar Ads */}
         <aside className="ad-sidebar ad-sidebar-right">
-          <AdBanner adKey="f4f75dd9ec066f77eda187fd5d7c9b14" width={160} height={600} />
           <AdBanner adKey="03c5896734fc5b90882213eba8126ed8" width={160} height={300} />
+          {/* TODO: Add more ad keys here when available */}
+          <div className="ad-placeholder" style={{ width: 160, height: 300, background: 'rgba(255,255,255,0.03)', borderRadius: 8 }} />
         </aside>
       </div>
 
