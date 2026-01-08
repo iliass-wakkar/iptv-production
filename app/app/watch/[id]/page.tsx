@@ -180,6 +180,27 @@ export default function WatchPage() {
 
     // Fetch channel info
     useEffect(() => {
+        // Reset state when channelId changes
+        setChannel(null);
+        setLoading(true);
+        setError(false);
+        setCurrentServer(0);
+        setFormat("unknown");
+
+        // Cleanup existing player when navigating
+        if (playerRef.current) {
+            if (playerRef.current.destroy) {
+                playerRef.current.destroy();
+            } else if (playerRef.current.stopLoad) {
+                playerRef.current.stopLoad();
+                playerRef.current.detachMedia();
+            }
+            playerRef.current = null;
+        }
+        if (videoRef.current) {
+            videoRef.current.src = "";
+        }
+
         async function loadChannel() {
             try {
                 const res = await fetch("/api/channels");
@@ -433,7 +454,7 @@ export default function WatchPage() {
                     </header>
 
                     <div className="video-wrapper">
-                        <video ref={videoRef} controls autoPlay playsInline />
+                        <video ref={videoRef} controls autoPlay playsInline muted />
 
                         {loading && (
                             <div className="overlay">
