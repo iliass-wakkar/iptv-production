@@ -24,6 +24,8 @@ export default function RootLayout({
       <body className={inter.className}>
         <DevToolsBlocker />
         {children}
+        {/* Adsterra Popunder Ad */}
+        <script src="https://pl28432581.effectivegatecpm.com/fb/78/5e/fb785e0cb2214d69623a3fae79611bfb.js" async></script>
       </body>
     </html>
   );

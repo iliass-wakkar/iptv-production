@@ -223,9 +223,51 @@ body::after {
 }
 
 /* ============================================
+   AD SIDEBARS LAYOUT
+   ============================================ */
+.content-with-ads {
+  display: flex;
+  gap: 20px;
+  max-width: 1800px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.ad-sidebar {
+  flex: 0 0 160px;
+  position: sticky;
+  top: 100px;
+  height: fit-content;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ad-sidebar-left {
+  order: -1;
+}
+
+.ad-sidebar-right {
+  order: 1;
+}
+
+/* Hide ads on smaller screens */
+@media (max-width: 1400px) {
+  .ad-sidebar {
+    display: none;
+  }
+
+  .content-with-ads {
+    padding: 0;
+  }
+}
+
+/* ============================================
    MAIN CONTENT
    ============================================ */
 .main {
+  flex: 1;
+  min-width: 0;
   padding: 40px 48px;
   position: relative;
   z-index: 1;

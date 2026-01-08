@@ -196,139 +196,220 @@ export default function HomePage() {
           </div>
         </div>
         <div className="header-right">
-          {/* No login button - public access */}
+          {/* Adsterra Header Banner 728x90 */}
+          <div id="header-ad" dangerouslySetInnerHTML={{
+            __html: `
+              <script>
+                atOptions = {
+                  'key' : 'c8497da66b156445a151c369365cfec8',
+                  'format' : 'iframe',
+                  'height' : 90,
+                  'width' : 728,
+                  'params' : {}
+                };
+              </script>
+              <script src="https://www.highperformanceformat.com/c8497da66b156445a151c369365cfec8/invoke.js"></script>
+            `
+          }} />
         </div>
       </header>
 
-      <main className="main">
-        {/* Trending Section */}
-        <section className="section">
-          <div className="section-header">
-            <h2 className="section-title">Trending Now</h2>
-          </div>
-          <div className="slider-container">
-            <button className="slider-arrow left" onClick={slideLeft} aria-label="Scroll left">
-              ‹
-            </button>
-            <div className="trending-slider" ref={sliderRef}>
-              {trendingChannels.map(([channelId, channel], idx) => (
-                <Link
-                  key={channelId}
-                  href={`/watch/${channelId}`}
-                  className="trending-card"
-                >
-                  <span className="trending-rank-bg">{idx + 1}</span>
-                  <div className="trending-content">
-                    <div className="trending-thumb">
-                      {isValidLogo(channel.logo) && (
-                        <div
-                          className="trending-thumb-bg"
-                          style={{ backgroundImage: `url('${channel.logo}')` }}
-                        />
-                      )}
-                      {isValidLogo(channel.logo) ? (
-                        <img src={channel.logo} alt={channel.name} />
-                      ) : (
-                        <div className={`channel-placeholder ${getGradientClass(channel.name)}`}>
-                          {getInitials(channel.name)}
-                        </div>
-                      )}
-                      <span className="trending-live">LIVE</span>
-                    </div>
-                    <div className="trending-info">
-                      <div className="trending-name">{channel.name}</div>
-                      <div className="trending-category">
-                        {channel.group || "Live TV"}
-                      </div>
-                    </div>
-                  </div>
-                </Link>
-              ))}
+      {/* Main content with ad sidebars */}
+      <div className="content-with-ads">
+        {/* Left Sidebar Ads */}
+        <aside className="ad-sidebar ad-sidebar-left">
+          <div dangerouslySetInnerHTML={{
+            __html: `
+              <script>
+                atOptions = {
+                  'key' : 'f4f75dd9ec066f77eda187fd5d7c9b14',
+                  'format' : 'iframe',
+                  'height' : 600,
+                  'width' : 160,
+                  'params' : {}
+                };
+              </script>
+              <script src="https://www.highperformanceformat.com/f4f75dd9ec066f77eda187fd5d7c9b14/invoke.js"></script>
+            `
+          }} />
+          <div style={{ marginTop: '10px' }} dangerouslySetInnerHTML={{
+            __html: `
+              <script>
+                atOptions = {
+                  'key' : '03c5896734fc5b90882213eba8126ed8',
+                  'format' : 'iframe',
+                  'height' : 300,
+                  'width' : 160,
+                  'params' : {}
+                };
+              </script>
+              <script src="https://www.highperformanceformat.com/03c5896734fc5b90882213eba8126ed8/invoke.js"></script>
+            `
+          }} />
+        </aside>
+
+        <main className="main">
+          {/* Trending Section */}
+          <section className="section">
+            <div className="section-header">
+              <h2 className="section-title">Trending Now</h2>
             </div>
-            <button className="slider-arrow right" onClick={slideRight} aria-label="Scroll right">
-              ›
-            </button>
-            <div className="slider-fade" />
-          </div>
-        </section>
-
-        {/* Category Bar */}
-        <div className="category-bar">
-          {CATEGORIES.map((cat) => (
-            <button
-              key={cat.id}
-              className={`category-tab ${cat.id === currentCategory ? "active" : ""}`}
-              onClick={() => setCurrentCategory(cat.id)}
-            >
-              {cat.name} <span className="category-count">{counts[cat.id] || 0}</span>
-            </button>
-          ))}
-        </div>
-
-        {/* Loading State */}
-        {loading && (
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '80px 0', gap: '16px' }}>
-            <div className="spinner" />
-            <span style={{ color: 'var(--text-muted)' }}>Loading channels...</span>
-          </div>
-        )}
-
-        {/* Error State */}
-        {error && (
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '80px 0', gap: '16px' }}>
-            <span style={{ fontSize: '48px' }}>⚠️</span>
-            <span style={{ color: 'var(--text-muted)' }}>Failed to load channels</span>
-          </div>
-        )}
-
-        {/* Channel Grid */}
-        {!loading && !error && (
-          <>
-            {filteredChannels.length === 0 ? (
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '80px 0', gap: '16px' }}>
-                <span style={{ fontSize: '48px', opacity: 0.4 }}>🔍</span>
-                <span style={{ color: 'var(--text-muted)' }}>No channels found</span>
-              </div>
-            ) : (
-              <div className="channel-grid">
-                {filteredChannels.map(([channelId, channel]) => (
+            <div className="slider-container">
+              <button className="slider-arrow left" onClick={slideLeft} aria-label="Scroll left">
+                ‹
+              </button>
+              <div className="trending-slider" ref={sliderRef}>
+                {trendingChannels.map(([channelId, channel], idx) => (
                   <Link
                     key={channelId}
                     href={`/watch/${channelId}`}
-                    className="channel-card"
+                    className="trending-card"
                   >
-                    {isValidLogo(channel.logo) && (
-                      <div
-                        className="channel-bg"
-                        style={{ backgroundImage: `url('${channel.logo}')` }}
-                      />
-                    )}
-                    <div className="channel-content">
-                      {isValidLogo(channel.logo) ? (
-                        <img
-                          className="channel-logo"
-                          src={channel.logo}
-                          alt={channel.name}
-                          onError={(e) => {
-                            e.currentTarget.style.display = "none";
-                            const sibling = e.currentTarget.nextElementSibling;
-                            if (sibling) sibling.classList.remove('hidden');
-                          }}
-                        />
-                      ) : null}
-                      <div className={`channel-placeholder ${getGradientClass(channel.name)} ${isValidLogo(channel.logo) ? 'hidden' : ''}`}>
-                        {getInitials(channel.name)}
+                    <span className="trending-rank-bg">{idx + 1}</span>
+                    <div className="trending-content">
+                      <div className="trending-thumb">
+                        {isValidLogo(channel.logo) && (
+                          <div
+                            className="trending-thumb-bg"
+                            style={{ backgroundImage: `url('${channel.logo}')` }}
+                          />
+                        )}
+                        {isValidLogo(channel.logo) ? (
+                          <img src={channel.logo} alt={channel.name} />
+                        ) : (
+                          <div className={`channel-placeholder ${getGradientClass(channel.name)}`}>
+                            {getInitials(channel.name)}
+                          </div>
+                        )}
+                        <span className="trending-live">LIVE</span>
                       </div>
-                      <div className="channel-name">{channel.name}</div>
-                      <div className="channel-category">{channel.group || "Live TV"}</div>
+                      <div className="trending-info">
+                        <div className="trending-name">{channel.name}</div>
+                        <div className="trending-category">
+                          {channel.group || "Live TV"}
+                        </div>
+                      </div>
                     </div>
                   </Link>
                 ))}
               </div>
-            )}
-          </>
-        )}
-      </main>
+              <button className="slider-arrow right" onClick={slideRight} aria-label="Scroll right">
+                ›
+              </button>
+              <div className="slider-fade" />
+            </div>
+          </section>
+
+          {/* Category Bar */}
+          <div className="category-bar">
+            {CATEGORIES.map((cat) => (
+              <button
+                key={cat.id}
+                className={`category-tab ${cat.id === currentCategory ? "active" : ""}`}
+                onClick={() => setCurrentCategory(cat.id)}
+              >
+                {cat.name} <span className="category-count">{counts[cat.id] || 0}</span>
+              </button>
+            ))}
+          </div>
+
+          {/* Loading State */}
+          {loading && (
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '80px 0', gap: '16px' }}>
+              <div className="spinner" />
+              <span style={{ color: 'var(--text-muted)' }}>Loading channels...</span>
+            </div>
+          )}
+
+          {/* Error State */}
+          {error && (
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '80px 0', gap: '16px' }}>
+              <span style={{ fontSize: '48px' }}>⚠️</span>
+              <span style={{ color: 'var(--text-muted)' }}>Failed to load channels</span>
+            </div>
+          )}
+
+          {/* Channel Grid */}
+          {!loading && !error && (
+            <>
+              {filteredChannels.length === 0 ? (
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '80px 0', gap: '16px' }}>
+                  <span style={{ fontSize: '48px', opacity: 0.4 }}>🔍</span>
+                  <span style={{ color: 'var(--text-muted)' }}>No channels found</span>
+                </div>
+              ) : (
+                <div className="channel-grid">
+                  {filteredChannels.map(([channelId, channel]) => (
+                    <Link
+                      key={channelId}
+                      href={`/watch/${channelId}`}
+                      className="channel-card"
+                    >
+                      {isValidLogo(channel.logo) && (
+                        <div
+                          className="channel-bg"
+                          style={{ backgroundImage: `url('${channel.logo}')` }}
+                        />
+                      )}
+                      <div className="channel-content">
+                        {isValidLogo(channel.logo) ? (
+                          <img
+                            className="channel-logo"
+                            src={channel.logo}
+                            alt={channel.name}
+                            onError={(e) => {
+                              e.currentTarget.style.display = "none";
+                              const sibling = e.currentTarget.nextElementSibling;
+                              if (sibling) sibling.classList.remove('hidden');
+                            }}
+                          />
+                        ) : null}
+                        <div className={`channel-placeholder ${getGradientClass(channel.name)} ${isValidLogo(channel.logo) ? 'hidden' : ''}`}>
+                          {getInitials(channel.name)}
+                        </div>
+                        <div className="channel-name">{channel.name}</div>
+                        <div className="channel-category">{channel.group || "Live TV"}</div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </>
+          )}
+        </main>
+
+        {/* Right Sidebar Ads */}
+        <aside className="ad-sidebar ad-sidebar-right">
+          <div dangerouslySetInnerHTML={{
+            __html: `
+              <script>
+                atOptions = {
+                  'key' : 'f4f75dd9ec066f77eda187fd5d7c9b14',
+                  'format' : 'iframe',
+                  'height' : 600,
+                  'width' : 160,
+                  'params' : {}
+                };
+              </script>
+              <script src="https://www.highperformanceformat.com/f4f75dd9ec066f77eda187fd5d7c9b14/invoke.js"></script>
+            `
+          }} />
+          <div style={{ marginTop: '10px' }} dangerouslySetInnerHTML={{
+            __html: `
+              <script>
+                atOptions = {
+                  'key' : '03c5896734fc5b90882213eba8126ed8',
+                  'format' : 'iframe',
+                  'height' : 300,
+                  'width' : 160,
+                  'params' : {}
+                };
+              </script>
+              <script src="https://www.highperformanceformat.com/03c5896734fc5b90882213eba8126ed8/invoke.js"></script>
+            `
+          }} />
+        </aside>
+      </div>
 
       <footer className="footer">
         ⚡ Secure streaming powered by OpenResty
