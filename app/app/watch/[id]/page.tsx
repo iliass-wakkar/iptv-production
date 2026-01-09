@@ -646,18 +646,14 @@ export default function WatchPage() {
                                     </div>
                                 )}
                             </div>
-
-                            {/* Native Banner */}
-                            <div className="native-banner-container">
-                                <NativeBanner />
-                            </div>
                         </div>
                     </div>
 
-                    {/* Right Sidebar - 160x300 + 300x250 */}
+                    {/* Right Sidebar - 160x300 + 300x250 + Native */}
                     <aside className="ad-sidebar-right">
                         <AdBanner adKey="03c5896734fc5b90882213eba8126ed8" width={160} height={300} />
                         <AdBanner adKey="0bbd75a017db7c965294b3f14e4f65fb" width={300} height={250} />
+                        <NativeBanner />
                     </aside>
                 </div>
 

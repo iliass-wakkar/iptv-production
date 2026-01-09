@@ -6,6 +6,7 @@ import HilltopBanner1 from "@/components/HilltopBanner1";
 import HilltopBanner2 from "@/components/HilltopBanner2";
 import HilltopInPagePush from "@/components/HilltopInPagePush";
 import Popunder from "@/components/Popunder";
+import BottomNav from "@/components/BottomNav";
 
 // Types
 interface Channel {
@@ -206,10 +207,11 @@ export default function HomePage() {
           <div className="search-wrapper">
             <span className="search-icon">⌕</span>
             <input
+              id="search-input"
               ref={searchRef}
               type="text"
               className="search-input"
-              placeholder="Search channels..."
+              placeholder="Search channels... (Ctrl + K)"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
@@ -421,6 +423,8 @@ export default function HomePage() {
       <footer className="footer">
         ⚡ Secure streaming powered by OpenResty
       </footer>
+
+      <BottomNav />
     </>
   );
 }
