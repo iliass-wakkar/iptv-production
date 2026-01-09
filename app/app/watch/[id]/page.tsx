@@ -3,6 +3,10 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
+import AdBanner from "@/components/AdBanner";
+import NativeBanner from "@/components/NativeBanner";
+import SocialBar from "@/components/SocialBar";
+import Popunder from "@/components/Popunder";
 
 interface Channel {
     name: string;
@@ -18,17 +22,29 @@ const playerStyles = `
     background: var(--bg-primary);
   }
 
-  .player-container {
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 20px;
+  /* Navbar with 468x60 banner */
+  .player-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 24px;
+    background: rgba(5, 5, 5, 0.9);
+    border-bottom: 1px solid var(--border);
   }
 
-  .player-header {
+  .nav-left {
     display: flex;
     align-items: center;
     gap: 20px;
-    margin-bottom: 20px;
+  }
+
+  .nav-logo {
+    font-size: 24px;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-decoration: none;
   }
 
   .back-btn {
@@ -42,8 +58,54 @@ const playerStyles = `
     color: var(--text-primary);
   }
 
+  /* 728x90 Leaderboard */
+  .leaderboard-ad {
+    display: flex;
+    justify-content: center;
+    padding: 15px 0;
+    background: rgba(0,0,0,0.3);
+  }
+
+  /* Main layout with sidebars */
+  .player-layout {
+    display: flex;
+    gap: 20px;
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+
+  /* Left sidebar ad */
+  .ad-sidebar-left {
+    flex: 0 0 160px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  /* Right sidebar ads */
+  .ad-sidebar-right {
+    flex: 0 0 300px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  /* Center content */
+  .player-center {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .player-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 15px;
+  }
+
   .player-header h1 {
-    font-size: 20px;
+    font-size: 18px;
     font-weight: 600;
     color: var(--text-primary);
     display: flex;
@@ -68,7 +130,7 @@ const playerStyles = `
     background: #000;
     border-radius: 12px;
     overflow: hidden;
-    margin-bottom: 20px;
+    margin-bottom: 15px;
   }
 
   .video-wrapper video {
@@ -101,7 +163,15 @@ const playerStyles = `
     font-size: 16px;
   }
 
+  /* Player info with native banner beside it */
+  .player-info-row {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+  }
+
   .player-info {
+    flex: 1;
     padding: 16px;
     background: var(--bg-card);
     border-radius: 12px;
@@ -158,6 +228,41 @@ const playerStyles = `
   .server-btn.active {
     background: var(--gradient-start);
     border-color: var(--gradient-start);
+  }
+
+  /* Native banner area */
+  .native-banner-container {
+    flex: 0 0 300px;
+    max-width: 300px;
+  }
+
+  /* Bottom mobile banner */
+  .bottom-ad {
+    display: flex;
+    justify-content: center;
+    padding: 20px 0;
+  }
+
+  /* Responsive - hide sidebars on mobile */
+  @media (max-width: 1200px) {
+    .ad-sidebar-left {
+      display: none;
+    }
+    .ad-sidebar-right {
+      display: none;
+    }
+    .native-banner-container {
+      display: none;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .player-layout {
+      padding: 10px;
+    }
+    .leaderboard-ad {
+      display: none;
+    }
   }
 `;
 
@@ -464,60 +569,101 @@ export default function WatchPage() {
         <>
             <style>{playerStyles}</style>
 
-            {/* Scripts loaded dynamically in useEffect */}
+            {/* Global ads - Popunder + Social Bar */}
+            <Popunder />
+            <SocialBar />
 
             <div className="player-page">
-                <div className="player-container">
-                    <header className="player-header">
-                        <Link href="/" className="back-btn">
-                            ← Back
-                        </Link>
-                        <h1>
-                            {loading ? "Loading..." : channel?.name || "Channel not found"}
-                            <span className="openresty-badge">⚡ OpenResty</span>
-                        </h1>
-                    </header>
+                {/* Navbar with 468x60 banner */}
+                <nav className="player-nav">
+                    <div className="nav-left">
+                        <Link href="/" className="nav-logo">IPTV</Link>
+                        <Link href="/" className="back-btn">← Back to channels</Link>
+                    </div>
+                    <AdBanner adKey="5c1bad559da4a50104d327c162cdc746" width={468} height={60} />
+                </nav>
 
-                    <div className="video-wrapper">
-                        <video ref={videoRef} controls autoPlay playsInline muted />
+                {/* 728x90 Leaderboard */}
+                <div className="leaderboard-ad">
+                    <AdBanner adKey="c8497da66b156445a151c369365cfec8" width={728} height={90} />
+                </div>
 
-                        {loading && (
-                            <div className="overlay">
-                                <div className="spinner" />
-                                <p>Loading stream...</p>
+                {/* Main layout with sidebars */}
+                <div className="player-layout">
+                    {/* Left Sidebar - 160x600 */}
+                    <aside className="ad-sidebar-left">
+                        <AdBanner adKey="f4f75dd9ec066f77eda187fd5d7c9b14" width={160} height={600} />
+                    </aside>
+
+                    {/* Center - Player */}
+                    <div className="player-center">
+                        <header className="player-header">
+                            <h1>
+                                {loading ? "Loading..." : channel?.name || "Channel not found"}
+                                <span className="openresty-badge">⚡ OpenResty</span>
+                            </h1>
+                        </header>
+
+                        <div className="video-wrapper">
+                            <video ref={videoRef} controls autoPlay playsInline muted />
+
+                            {loading && (
+                                <div className="overlay">
+                                    <div className="spinner" />
+                                    <p>Loading stream...</p>
+                                </div>
+                            )}
+
+                            {error && (
+                                <div className="overlay">
+                                    <p>⚠️ Stream unavailable</p>
+                                    <button onClick={() => window.location.reload()}>Retry</button>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Player info + Native Banner */}
+                        <div className="player-info-row">
+                            <div className="player-info">
+                                <p>
+                                    Channel: <strong>{channel?.name || "Loading..."}</strong>
+                                    <span className="format-badge">{format.toUpperCase()}</span>
+                                </p>
+                                <p className="secure-note">🔒 Powered by OpenResty - Ultra Fast Streaming</p>
+
+                                {channel && channel.server_count && channel.server_count > 1 && (
+                                    <div className="server-selector">
+                                        <span style={{ color: "var(--text-secondary)" }}>Servers:</span>
+                                        {Array.from({ length: channel.server_count }).map((_, i) => (
+                                            <button
+                                                key={i}
+                                                className={`server-btn ${i === currentServer ? "active" : ""}`}
+                                                onClick={() => switchServer(i)}
+                                            >
+                                                Server {i + 1}
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
-                        )}
 
-                        {error && (
-                            <div className="overlay">
-                                <p>⚠️ Stream unavailable</p>
-                                <button onClick={() => window.location.reload()}>Retry</button>
+                            {/* Native Banner */}
+                            <div className="native-banner-container">
+                                <NativeBanner />
                             </div>
-                        )}
+                        </div>
                     </div>
 
-                    <div className="player-info">
-                        <p>
-                            Channel: <strong>{channel?.name || "Loading..."}</strong>
-                            <span className="format-badge">{format.toUpperCase()}</span>
-                        </p>
-                        <p className="secure-note">🔒 Powered by OpenResty - Ultra Fast Streaming</p>
+                    {/* Right Sidebar - 160x300 + 300x250 */}
+                    <aside className="ad-sidebar-right">
+                        <AdBanner adKey="03c5896734fc5b90882213eba8126ed8" width={160} height={300} />
+                        <AdBanner adKey="0bbd75a017db7c965294b3f14e4f65fb" width={300} height={250} />
+                    </aside>
+                </div>
 
-                        {channel && channel.server_count && channel.server_count > 1 && (
-                            <div className="server-selector">
-                                <span style={{ color: "var(--text-secondary)" }}>Servers:</span>
-                                {Array.from({ length: channel.server_count }).map((_, i) => (
-                                    <button
-                                        key={i}
-                                        className={`server-btn ${i === currentServer ? "active" : ""}`}
-                                        onClick={() => switchServer(i)}
-                                    >
-                                        Server {i + 1}
-                                    </button>
-                                ))}
-                            </div>
-                        )}
-                    </div>
+                {/* Bottom 320x50 Mobile Banner */}
+                <div className="bottom-ad">
+                    <AdBanner adKey="0cc029fe0605b3e9aa8137e32e3e3689" width={320} height={50} />
                 </div>
             </div>
         </>

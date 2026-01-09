@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
-import AdBanner from "@/components/AdBanner";
 
 // Types
 interface Channel {
@@ -197,8 +196,7 @@ export default function HomePage() {
           </div>
         </div>
         <div className="header-right">
-          {/* Adsterra Header Banner 728x90 */}
-          <AdBanner adKey="c8497da66b156445a151c369365cfec8" width={728} height={90} />
+          {/* Reserved for future ads */}
         </div>
       </header>
 
@@ -253,101 +251,85 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Channel Grid with Ad Sidebars */}
-      <div className="content-with-ads">
-        {/* Left Sidebar Ads */}
-        <aside className="ad-sidebar ad-sidebar-left">
-          <AdBanner adKey="f4f75dd9ec066f77eda187fd5d7c9b14" width={160} height={600} />
-          {/* TODO: Add more ad keys here when available */}
-          <div className="ad-placeholder" style={{ width: 160, height: 300, background: 'rgba(255,255,255,0.03)', borderRadius: 8 }} />
-        </aside>
+      {/* Channel Grid */}
+      <main className="main">
+        {/* Category Bar */}
+        <div className="category-bar">
+          {CATEGORIES.map((cat) => (
+            <button
+              key={cat.id}
+              className={`category-tab ${cat.id === currentCategory ? "active" : ""}`}
+              onClick={() => setCurrentCategory(cat.id)}
+            >
+              {cat.name} <span className="category-count">{counts[cat.id] || 0}</span>
+            </button>
+          ))}
+        </div>
 
-        <main className="main">
-          {/* Category Bar */}
-          <div className="category-bar">
-            {CATEGORIES.map((cat) => (
-              <button
-                key={cat.id}
-                className={`category-tab ${cat.id === currentCategory ? "active" : ""}`}
-                onClick={() => setCurrentCategory(cat.id)}
-              >
-                {cat.name} <span className="category-count">{counts[cat.id] || 0}</span>
-              </button>
-            ))}
+        {/* Loading State */}
+        {loading && (
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '80px 0', gap: '16px' }}>
+            <div className="spinner" />
+            <span style={{ color: 'var(--text-muted)' }}>Loading channels...</span>
           </div>
+        )}
 
-          {/* Loading State */}
-          {loading && (
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '80px 0', gap: '16px' }}>
-              <div className="spinner" />
-              <span style={{ color: 'var(--text-muted)' }}>Loading channels...</span>
-            </div>
-          )}
+        {/* Error State */}
+        {error && (
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '80px 0', gap: '16px' }}>
+            <span style={{ fontSize: '48px' }}>⚠️</span>
+            <span style={{ color: 'var(--text-muted)' }}>Failed to load channels</span>
+          </div>
+        )}
 
-          {/* Error State */}
-          {error && (
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '80px 0', gap: '16px' }}>
-              <span style={{ fontSize: '48px' }}>⚠️</span>
-              <span style={{ color: 'var(--text-muted)' }}>Failed to load channels</span>
-            </div>
-          )}
-
-          {/* Channel Grid */}
-          {!loading && !error && (
-            <>
-              {filteredChannels.length === 0 ? (
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '80px 0', gap: '16px' }}>
-                  <span style={{ fontSize: '48px', opacity: 0.4 }}>🔍</span>
-                  <span style={{ color: 'var(--text-muted)' }}>No channels found</span>
-                </div>
-              ) : (
-                <div className="channel-grid">
-                  {filteredChannels.map(([channelId, channel]) => (
-                    <Link
-                      key={channelId}
-                      href={`/watch/${channelId}`}
-                      className="channel-card"
-                    >
-                      {isValidLogo(channel.logo) && (
-                        <div
-                          className="channel-bg"
-                          style={{ backgroundImage: `url('${channel.logo}')` }}
+        {/* Channel Grid */}
+        {!loading && !error && (
+          <>
+            {filteredChannels.length === 0 ? (
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '80px 0', gap: '16px' }}>
+                <span style={{ fontSize: '48px', opacity: 0.4 }}>🔍</span>
+                <span style={{ color: 'var(--text-muted)' }}>No channels found</span>
+              </div>
+            ) : (
+              <div className="channel-grid">
+                {filteredChannels.map(([channelId, channel]) => (
+                  <Link
+                    key={channelId}
+                    href={`/watch/${channelId}`}
+                    className="channel-card"
+                  >
+                    {isValidLogo(channel.logo) && (
+                      <div
+                        className="channel-bg"
+                        style={{ backgroundImage: `url('${channel.logo}')` }}
+                      />
+                    )}
+                    <div className="channel-content">
+                      {isValidLogo(channel.logo) ? (
+                        <img
+                          className="channel-logo"
+                          src={channel.logo}
+                          alt={channel.name}
+                          onError={(e) => {
+                            e.currentTarget.style.display = "none";
+                            const sibling = e.currentTarget.nextElementSibling;
+                            if (sibling) sibling.classList.remove('hidden');
+                          }}
                         />
-                      )}
-                      <div className="channel-content">
-                        {isValidLogo(channel.logo) ? (
-                          <img
-                            className="channel-logo"
-                            src={channel.logo}
-                            alt={channel.name}
-                            onError={(e) => {
-                              e.currentTarget.style.display = "none";
-                              const sibling = e.currentTarget.nextElementSibling;
-                              if (sibling) sibling.classList.remove('hidden');
-                            }}
-                          />
-                        ) : null}
-                        <div className={`channel-placeholder ${getGradientClass(channel.name)} ${isValidLogo(channel.logo) ? 'hidden' : ''}`}>
-                          {getInitials(channel.name)}
-                        </div>
-                        <div className="channel-name">{channel.name}</div>
-                        <div className="channel-category">{channel.group || "Live TV"}</div>
+                      ) : null}
+                      <div className={`channel-placeholder ${getGradientClass(channel.name)} ${isValidLogo(channel.logo) ? 'hidden' : ''}`}>
+                        {getInitials(channel.name)}
                       </div>
-                    </Link>
-                  ))}
-                </div>
-              )}
-            </>
-          )}
-        </main>
-
-        {/* Right Sidebar Ads */}
-        <aside className="ad-sidebar ad-sidebar-right">
-          <AdBanner adKey="03c5896734fc5b90882213eba8126ed8" width={160} height={300} />
-          {/* TODO: Add more ad keys here when available */}
-          <div className="ad-placeholder" style={{ width: 160, height: 300, background: 'rgba(255,255,255,0.03)', borderRadius: 8 }} />
-        </aside>
-      </div>
+                      <div className="channel-name">{channel.name}</div>
+                      <div className="channel-category">{channel.group || "Live TV"}</div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </>
+        )}
+      </main>
 
       <footer className="footer">
         ⚡ Secure streaming powered by OpenResty
