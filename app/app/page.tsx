@@ -79,6 +79,8 @@ export default function HomePage() {
   const [error, setError] = useState(false);
   const [currentCategory, setCurrentCategory] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const CHANNELS_PER_PAGE = 48;
   const sliderRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLInputElement>(null);
 
@@ -165,6 +167,16 @@ export default function HomePage() {
   }
   filteredChannels.sort((a, b) => a[1].name.localeCompare(b[1].name));
 
+  // Pagination
+  const totalPages = Math.ceil(filteredChannels.length / CHANNELS_PER_PAGE);
+  const startIndex = (currentPage - 1) * CHANNELS_PER_PAGE;
+  const paginatedChannels = filteredChannels.slice(startIndex, startIndex + CHANNELS_PER_PAGE);
+
+  // Reset page when category or search changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [currentCategory, searchQuery]);
+
   // Slider controls
   const slideLeft = useCallback(() => {
     sliderRef.current?.scrollBy({ left: -400, behavior: "smooth" });
@@ -180,7 +192,9 @@ export default function HomePage() {
     <>
       {/* Header */}
       <header className="header">
-        <div className="logo">IPTV</div>
+        <Link href="/" className="logo">
+          <img src="/logo.png" alt="IPTV" className="logo-img" />
+        </Link>
         <div className="header-center">
           <div className="search-wrapper">
             <span className="search-icon">⌕</span>
@@ -291,41 +305,89 @@ export default function HomePage() {
                 <span style={{ color: 'var(--text-muted)' }}>No channels found</span>
               </div>
             ) : (
-              <div className="channel-grid">
-                {filteredChannels.map(([channelId, channel]) => (
-                  <Link
-                    key={channelId}
-                    href={`/watch/${channelId}`}
-                    className="channel-card"
-                  >
-                    {isValidLogo(channel.logo) && (
-                      <div
-                        className="channel-bg"
-                        style={{ backgroundImage: `url('${channel.logo}')` }}
-                      />
-                    )}
-                    <div className="channel-content">
-                      {isValidLogo(channel.logo) ? (
-                        <img
-                          className="channel-logo"
-                          src={channel.logo}
-                          alt={channel.name}
-                          onError={(e) => {
-                            e.currentTarget.style.display = "none";
-                            const sibling = e.currentTarget.nextElementSibling;
-                            if (sibling) sibling.classList.remove('hidden');
-                          }}
+              <>
+                <div className="channel-grid">
+                  {paginatedChannels.map(([channelId, channel]) => (
+                    <Link
+                      key={channelId}
+                      href={`/watch/${channelId}`}
+                      className="channel-card"
+                    >
+                      {isValidLogo(channel.logo) && (
+                        <div
+                          className="channel-bg"
+                          style={{ backgroundImage: `url('${channel.logo}')` }}
                         />
-                      ) : null}
-                      <div className={`channel-placeholder ${getGradientClass(channel.name)} ${isValidLogo(channel.logo) ? 'hidden' : ''}`}>
-                        {getInitials(channel.name)}
+                      )}
+                      <div className="channel-content">
+                        {isValidLogo(channel.logo) ? (
+                          <img
+                            className="channel-logo"
+                            src={channel.logo}
+                            alt={channel.name}
+                            onError={(e) => {
+                              e.currentTarget.style.display = "none";
+                              const sibling = e.currentTarget.nextElementSibling;
+                              if (sibling) sibling.classList.remove('hidden');
+                            }}
+                          />
+                        ) : null}
+                        <div className={`channel-placeholder ${getGradientClass(channel.name)} ${isValidLogo(channel.logo) ? 'hidden' : ''}`}>
+                          {getInitials(channel.name)}
+                        </div>
+                        <div className="channel-name">{channel.name}</div>
+                        <div className="channel-category">{channel.group || "Live TV"}</div>
                       </div>
-                      <div className="channel-name">{channel.name}</div>
-                      <div className="channel-category">{channel.group || "Live TV"}</div>
+                    </Link>
+                  ))}
+                </div>
+
+                {/* Pagination Controls */}
+                {totalPages > 1 && (
+                  <div className="pagination">
+                    <button
+                      className="pagination-btn"
+                      onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                      disabled={currentPage === 1}
+                    >
+                      ← Previous
+                    </button>
+                    <div className="pagination-pages">
+                      {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                        let pageNum;
+                        if (totalPages <= 5) {
+                          pageNum = i + 1;
+                        } else if (currentPage <= 3) {
+                          pageNum = i + 1;
+                        } else if (currentPage >= totalPages - 2) {
+                          pageNum = totalPages - 4 + i;
+                        } else {
+                          pageNum = currentPage - 2 + i;
+                        }
+                        return (
+                          <button
+                            key={pageNum}
+                            className={`pagination-page ${currentPage === pageNum ? 'active' : ''}`}
+                            onClick={() => setCurrentPage(pageNum)}
+                          >
+                            {pageNum}
+                          </button>
+                        );
+                      })}
                     </div>
-                  </Link>
-                ))}
-              </div>
+                    <span className="pagination-info">
+                      Page {currentPage} of {totalPages} ({filteredChannels.length} channels)
+                    </span>
+                    <button
+                      className="pagination-btn"
+                      onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                      disabled={currentPage === totalPages}
+                    >
+                      Next →
+                    </button>
+                  </div>
+                )}
+              </>
             )}
           </>
         )}
