@@ -13,7 +13,7 @@ export const metadata: Metadata = {
   description: "Watch live TV channels for free. Sports, movies, news and more.",
   keywords: "IPTV, live TV, streaming, sports, movies, free TV",
   other: {
-    monetag: "3f95202df91ca8910352e54b244fad81",
+    d28fe201288e6d5c647fada97bc63659cd47da62: "d28fe201288e6d5c647fada97bc63659cd47da62",
   },
 };
 

@@ -2,9 +2,6 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
-import MonetagVignette from "@/components/MonetagVignette";
-import MonetagPush from "@/components/MonetagPush";
-import MonetagInPagePush from "@/components/MonetagInPagePush";
 
 // Types
 interface Channel {
@@ -181,11 +178,6 @@ export default function HomePage() {
 
   return (
     <>
-      {/* Monetag Ads */}
-      <MonetagVignette />
-      <MonetagPush />
-      <MonetagInPagePush />
-
       {/* Header */}
       <header className="header">
         <div className="logo">IPTV</div>
