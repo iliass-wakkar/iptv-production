@@ -12,6 +12,7 @@ export const metadata: Metadata = {
   title: "IPTV Player - Live TV Streaming",
   description: "Watch live TV channels for free. Sports, movies, news and more.",
   keywords: "IPTV, live TV, streaming, sports, movies, free TV",
+  referrer: "no-referrer-when-downgrade",
   icons: {
     icon: "/icon.png",
     apple: "/icon.png",

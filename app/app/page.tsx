@@ -5,6 +5,7 @@ import Link from "next/link";
 import HilltopBanner1 from "@/components/HilltopBanner1";
 import HilltopBanner2 from "@/components/HilltopBanner2";
 import HilltopInPagePush from "@/components/HilltopInPagePush";
+import Popunder from "@/components/Popunder";
 
 // Types
 interface Channel {
@@ -193,6 +194,9 @@ export default function HomePage() {
 
   return (
     <>
+      {/* Adsterra Popunder */}
+      <Popunder />
+
       {/* Header */}
       <header className="header">
         <Link href="/" className="logo">
