@@ -923,3 +923,47 @@ body::after {
     display: none;
   }
 }
+
+/* Main Layout with Sidebar */
+.main-layout {
+  display: flex;
+  gap: 24px;
+}
+
+.main-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.ad-sidebar {
+  width: 320px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  position: sticky;
+  top: 100px;
+  height: fit-content;
+}
+
+.ad-slot {
+  min-height: 250px;
+  min-width: 300px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+@media (max-width: 1200px) {
+  .ad-sidebar {
+    display: none;
+  }
+
+  .main-layout {
+    display: block;
+  }
+}
