@@ -1,6 +1,6 @@
 {
   "totalBytes": 0,
-  "totalViews": 18,
+  "totalViews": 20,
   "hourlyStats": {
     "2026-01-07T23": {
       "bytes": 0,
@@ -20,7 +20,7 @@
     },
     "2026-01-18T12": {
       "bytes": 0,
-      "views": 4
+      "views": 6
     }
   },
   "channelStats": {
@@ -42,7 +42,7 @@
     },
     "ch_536": {
       "bytes": 0,
-      "views": 7
+      "views": 9
     },
     "ch_105": {
       "bytes": 0,
@@ -72,7 +72,15 @@
     },
     "session_1768739484632_2nqpq": {
       "channelId": "ch_536",
-      "lastSeen": 1768740869639
+      "lastSeen": 1768740936793
+    },
+    "session_1768740938581_wdt8cj": {
+      "channelId": "ch_536",
+      "lastSeen": 1768740938605
+    },
+    "session_1768740940259_oynb3f": {
+      "channelId": "ch_536",
+      "lastSeen": 1768740940276
     }
   }
 }

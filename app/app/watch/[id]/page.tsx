@@ -614,15 +614,18 @@ export default function WatchPage() {
                 }
             });
 
-            // For mpegts, seek to live and play
-            player.on("media_info" in player ? "media_info" : 0, () => {
-                video.play().catch(() => { });
+            // Use video 'playing' event - most reliable way to know stream started
+            video.onplaying = () => {
                 setLoading(false);
-            });
+            };
+
             playerRef.current = player;
         } else {
             // Fallback to native
             video.src = streamUrl;
+            video.onplaying = () => {
+                setLoading(false);
+            };
             video.play().catch(() => { });
         }
     }, [channelId, scriptsLoaded]);
