@@ -181,14 +181,13 @@ const playerStyles = `
     to { transform: rotate(360deg); }
   }
 
-  /* Poster background with blur effect */
+  /* Poster background - darkened */
   .video-poster-bg {
     position: absolute;
     inset: 0;
     background-size: cover;
     background-position: center;
-    filter: blur(30px) brightness(0.3);
-    transform: scale(1.1); /* Prevent blur edges */
+    filter: brightness(0.4);
   }
 
   .video-poster-logo {
@@ -200,6 +199,43 @@ const playerStyles = `
     max-height: 120px;
     object-fit: contain;
     z-index: 1;
+    opacity: 0.8;
+  }
+
+  /* Minimalist Play Button - HBO/Disney+ style */
+  .play-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 10;
+  }
+
+  .play-button {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.4);
+    border: 2px solid rgba(255, 255, 255, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(4px);
+  }
+
+  .play-button:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.1);
+  }
+
+  .play-button svg {
+    width: 32px;
+    height: 32px;
+    fill: white;
+    margin-left: 4px; /* Optical centering */
   }
 
   /* Player info with native banner beside it */
@@ -315,6 +351,7 @@ export default function WatchPage() {
     const [currentServer, setCurrentServer] = useState(0);
     const [format, setFormat] = useState("unknown");
     const [scriptsLoaded, setScriptsLoaded] = useState(false);
+    const [isPlaying, setIsPlaying] = useState(false); // User clicked play
 
     const videoRef = useRef<HTMLVideoElement>(null);
     const playerRef = useRef<any>(null);
@@ -590,12 +627,18 @@ export default function WatchPage() {
         }
     }, [channelId, scriptsLoaded]);
 
-    // Start player when channel loads and scripts are ready (autoplay)
+    // Start player only when user clicks play (lazy load)
     useEffect(() => {
-        if (channel && scriptsLoaded) {
+        if (channel && scriptsLoaded && isPlaying) {
             startPlayer(currentServer);
         }
-    }, [channel, scriptsLoaded, startPlayer, currentServer]);
+    }, [channel, scriptsLoaded, startPlayer, currentServer, isPlaying]);
+
+    // Handle play button click
+    const handlePlay = () => {
+        setIsPlaying(true);
+        setLoading(true);
+    };
 
     // Cleanup on unmount
     useEffect(() => {
@@ -653,8 +696,8 @@ export default function WatchPage() {
                         </header>
 
                         <div className="video-wrapper">
-                            {/* Blurred background + centered logo (shown while loading) */}
-                            {loading && channel?.logo && (
+                            {/* Darkened poster background + logo (shown before play) */}
+                            {!isPlaying && channel?.logo && (
                                 <>
                                     <div
                                         className="video-poster-bg"
@@ -668,16 +711,26 @@ export default function WatchPage() {
                                 </>
                             )}
 
+                            {/* Minimalist Play Button - shown before user clicks */}
+                            {!isPlaying && !loading && (
+                                <div className="play-overlay" onClick={handlePlay}>
+                                    <div className="play-button">
+                                        <svg viewBox="0 0 24 24">
+                                            <polygon points="5,3 19,12 5,21" />
+                                        </svg>
+                                    </div>
+                                </div>
+                            )}
+
                             <video
                                 ref={videoRef}
                                 controls
-                                autoPlay
-                                muted
                                 playsInline
+                                style={{ display: isPlaying ? 'block' : 'none' }}
                             />
 
-                            {/* Minimal loading spinner - no text */}
-                            {loading && (
+                            {/* Loading spinner - only when playing */}
+                            {loading && isPlaying && (
                                 <div className="overlay">
                                     <div className="spinner" />
                                 </div>
