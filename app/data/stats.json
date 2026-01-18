@@ -1,0 +1,54 @@
+{
+  "totalBytes": 0,
+  "totalViews": 12,
+  "hourlyStats": {
+    "2026-01-18T12": {
+      "bytes": 0,
+      "views": 12
+    }
+  },
+  "channelStats": {
+    "ch_45": {
+      "bytes": 0,
+      "views": 9
+    },
+    "ch_1": {
+      "bytes": 0,
+      "views": 3
+    }
+  },
+  "activeSessions": {
+    "session_1768738344746_weuq6": {
+      "channelId": "ch_45",
+      "lastSeen": 1768738364785
+    },
+    "session_1768738368486_m57ppd": {
+      "channelId": "ch_45",
+      "lastSeen": 1768738638512
+    },
+    "session_1768738885061_ectzmp": {
+      "channelId": "ch_45",
+      "lastSeen": 1768738935848
+    },
+    "session_1768738935427_zhwwbn": {
+      "channelId": "ch_1",
+      "lastSeen": 1768739005450
+    },
+    "session_1768738935581_vwey5": {
+      "channelId": "ch_1",
+      "lastSeen": 1768738935774
+    },
+    "session_1768738945157_ka23u": {
+      "channelId": "ch_45",
+      "lastSeen": 1768739005634
+    },
+    "session_1768739633507_fvyail": {
+      "channelId": "ch_45",
+      "lastSeen": 1768739633607
+    },
+    "session_1768739633510_6uefm7": {
+      "channelId": "ch_45",
+      "lastSeen": 1768739743634
+    }
+  }
+}

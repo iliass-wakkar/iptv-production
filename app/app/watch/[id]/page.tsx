@@ -146,21 +146,60 @@ const playerStyles = `
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    background: rgba(0, 0, 0, 0.8);
+    background: rgba(0, 0, 0, 0.85);
     color: white;
     text-align: center;
-    padding: 20px;
   }
 
   .overlay button {
     margin-top: 20px;
     padding: 12px 24px;
-    background: var(--gradient-start);
-    border: none;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.3);
     border-radius: 8px;
     color: white;
     cursor: pointer;
-    font-size: 16px;
+    font-size: 14px;
+    transition: all 0.2s;
+  }
+
+  .overlay button:hover {
+    background: rgba(255, 255, 255, 0.2);
+  }
+
+  /* Minimalist loading spinner - iOS style */
+  .spinner {
+    width: 48px;
+    height: 48px;
+    border: 3px solid rgba(255, 255, 255, 0.2);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  /* Poster background with blur effect */
+  .video-poster-bg {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+    filter: blur(30px) brightness(0.3);
+    transform: scale(1.1); /* Prevent blur edges */
+  }
+
+  .video-poster-logo {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    max-width: 200px;
+    max-height: 120px;
+    object-fit: contain;
+    z-index: 1;
   }
 
   /* Player info with native banner beside it */
@@ -504,7 +543,12 @@ export default function WatchPage() {
             });
 
             hls.on("hlsManifestParsed" in hls ? "hlsManifestParsed" : 1, () => {
+                // Seek to live edge before playing
+                if (hls.liveSyncPosition) {
+                    video.currentTime = hls.liveSyncPosition;
+                }
                 video.play().catch(() => { });
+                setLoading(false);
             });
 
             playerRef.current = hls;
@@ -533,7 +577,11 @@ export default function WatchPage() {
                 }
             });
 
-            video.play().catch(() => { });
+            // For mpegts, seek to live and play
+            player.on("media_info" in player ? "media_info" : 0, () => {
+                video.play().catch(() => { });
+                setLoading(false);
+            });
             playerRef.current = player;
         } else {
             // Fallback to native
@@ -542,7 +590,7 @@ export default function WatchPage() {
         }
     }, [channelId, scriptsLoaded]);
 
-    // Start player when channel loads and scripts are ready
+    // Start player when channel loads and scripts are ready (autoplay)
     useEffect(() => {
         if (channel && scriptsLoaded) {
             startPlayer(currentServer);
@@ -605,12 +653,33 @@ export default function WatchPage() {
                         </header>
 
                         <div className="video-wrapper">
-                            <video ref={videoRef} controls autoPlay playsInline muted />
+                            {/* Blurred background + centered logo (shown while loading) */}
+                            {loading && channel?.logo && (
+                                <>
+                                    <div
+                                        className="video-poster-bg"
+                                        style={{ backgroundImage: `url(${channel.logo})` }}
+                                    />
+                                    <img
+                                        src={channel.logo}
+                                        alt=""
+                                        className="video-poster-logo"
+                                    />
+                                </>
+                            )}
 
+                            <video
+                                ref={videoRef}
+                                controls
+                                autoPlay
+                                muted
+                                playsInline
+                            />
+
+                            {/* Minimal loading spinner - no text */}
                             {loading && (
                                 <div className="overlay">
                                     <div className="spinner" />
-                                    <p>Loading stream...</p>
                                 </div>
                             )}
 

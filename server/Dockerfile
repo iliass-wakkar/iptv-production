@@ -19,6 +19,7 @@ COPY nginx.conf /usr/local/openresty/nginx/conf/nginx.conf
 COPY lua/ /etc/openresty/lua/
 COPY html/ /etc/openresty/html/
 COPY data/channels.json /etc/openresty/data/
+COPY maintenance.html /etc/openresty/maintenance.html
 
 
 
