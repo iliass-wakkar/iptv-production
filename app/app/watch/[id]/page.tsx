@@ -619,6 +619,9 @@ export default function WatchPage() {
                 setLoading(false);
             };
 
+            // Start playback
+            video.play().catch(() => { });
+
             playerRef.current = player;
         } else {
             // Fallback to native
